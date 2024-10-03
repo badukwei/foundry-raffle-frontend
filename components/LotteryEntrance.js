@@ -1,24 +1,23 @@
-import { contractAddresses, abi } from "../constants"
-// dont export from moralis when using react
-import { useMoralis, useWeb3Contract } from "react-moralis"
-import { useEffect, useState } from "react"
-import { useNotification } from "web3uikit"
-import { ethers } from "ethers"
+import { contractAddresses, abi } from "../constants";
+import { useMoralis, useWeb3Contract } from "react-moralis";
+import { useEffect, useState } from "react";
+import { useNotification } from "web3uikit";
+import { ethers } from "ethers";
 
 export default function LotteryEntrance() {
-    const { Moralis, isWeb3Enabled, chainId: chainIdHex } = useMoralis()
+    const { Moralis, isWeb3Enabled, chainId: chainIdHex } = useMoralis();
     // These get re-rendered every time due to our connect button!
-    const chainId = parseInt(chainIdHex)
+    const chainId = parseInt(chainIdHex);
     // console.log(`ChainId is ${chainId}`)
-    const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
-
+    const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null;
+    console.log(raffleAddress)
     // State hooks
     // https://stackoverflow.com/questions/58252454/react-hooks-using-usestate-vs-just-variables
-    const [entranceFee, setEntranceFee] = useState("0")
-    const [numberOfPlayers, setNumberOfPlayers] = useState("0")
-    const [recentWinner, setRecentWinner] = useState("0")
+    const [entranceFee, setEntranceFee] = useState("0");
+    const [numberOfPlayers, setNumberOfPlayers] = useState("0");
+    const [recentWinner, setRecentWinner] = useState("0");
 
-    const dispatch = useNotification()
+    const dispatch = useNotification();
 
     const {
         runContractFunction: enterRaffle,
@@ -31,7 +30,7 @@ export default function LotteryEntrance() {
         functionName: "enterRaffle",
         msgValue: entranceFee,
         params: {},
-    })
+    });
 
     /* View Functions */
 
@@ -40,21 +39,21 @@ export default function LotteryEntrance() {
         contractAddress: raffleAddress, // specify the networkId
         functionName: "getEntranceFee",
         params: {},
-    })
+    });
 
-    const { runContractFunction: getPlayersNumber } = useWeb3Contract({
+    const { runContractFunction: getNumberOfPlayers } = useWeb3Contract({
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "getNumberOfPlayers",
         params: {},
-    })
+    });
 
     const { runContractFunction: getRecentWinner } = useWeb3Contract({
         abi: abi,
         contractAddress: raffleAddress,
         functionName: "getRecentWinner",
         params: {},
-    })
+    });
 
     async function updateUIValues() {
         // Another way we could make a contract call:
@@ -63,19 +62,19 @@ export default function LotteryEntrance() {
         //     functionName: "getEntranceFee",
         //     ...options,
         // })
-        const entranceFeeFromCall = (await getEntranceFee()).toString()
-        const numPlayersFromCall = (await getPlayersNumber()).toString()
-        const recentWinnerFromCall = await getRecentWinner()
-        setEntranceFee(entranceFeeFromCall)
-        setNumberOfPlayers(numPlayersFromCall)
-        setRecentWinner(recentWinnerFromCall)
+        const entranceFeeFromCall = (await getEntranceFee()).toString();
+        const numPlayersFromCall = (await getNumberOfPlayers()).toString();
+        const recentWinnerFromCall = await getRecentWinner();
+        setEntranceFee(entranceFeeFromCall);
+        setNumberOfPlayers(numPlayersFromCall);
+        setRecentWinner(recentWinnerFromCall);
     }
 
     useEffect(() => {
         if (isWeb3Enabled) {
-            updateUIValues()
+            updateUIValues();
         }
-    }, [isWeb3Enabled])
+    }, [isWeb3Enabled]);
     // no list means it'll update everytime anything changes or happens
     // empty list means it'll run once after the initial rendering
     // and dependencies mean it'll run whenever those things in the list change
@@ -96,18 +95,18 @@ export default function LotteryEntrance() {
             title: "Transaction Notification",
             position: "topR",
             icon: "bell",
-        })
-    }
+        });
+    };
 
     const handleSuccess = async (tx) => {
         try {
-            await tx.wait(1)
-            updateUIValues()
-            handleNewNotification(tx)
+            await tx.wait(1);
+            updateUIValues();
+            handleNewNotification(tx);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    }
+    };
 
     return (
         <div className="p-5">
@@ -140,5 +139,5 @@ export default function LotteryEntrance() {
                 <div>Please connect to a supported chain </div>
             )}
         </div>
-    )
+    );
 }
